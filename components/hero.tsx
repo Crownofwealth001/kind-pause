@@ -7,8 +7,8 @@ export function Hero() {
         A one-page space
       </p>
       <h1 className="max-w-4xl text-balance font-serif text-4xl leading-[1.1] tracking-tight text-brand md:text-6xl">
-        Being kind is easier when you have a clear path instead of freezing or over-reacting.
-      </h1>
+  Kindness is all that matters.
+  </h1>
       <p className="mt-8 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground">
         Kind Pause walks you through naming the feeling, the need, and a gentle next word or action.
       </p>
