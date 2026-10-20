@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react'
 import { SectionReveal } from '@/components/section-reveal'
 import { cn } from '@/lib/utils'
@@ -43,6 +44,7 @@ const nextSteps = [
 const steps = [
   {
     number: '01',
+    slug: 'name-the-feeling',
     title: 'Name the feeling',
     prompt: 'What am I feeling right now?',
     body: 'Before you respond, pause and notice what is happening inside you. Putting a name to a feeling helps it settle, so it guides you instead of driving you.',
@@ -51,6 +53,7 @@ const steps = [
   },
   {
     number: '02',
+    slug: 'name-the-need',
     title: 'Name the need',
     prompt: 'What do I need here?',
     body: 'Every hard feeling points to something that matters to you. When you know what you need, you can ask for it honestly instead of guessing or holding it in.',
@@ -59,6 +62,7 @@ const steps = [
   },
   {
     number: '03',
+    slug: 'gentle-next-step',
     title: 'Choose a gentle next step',
     prompt: 'What is a gentle next word or action?',
     body: 'You do not have to fix everything at once. Choose one small, kind step that is honest about how you feel and caring toward the other person and yourself.',
@@ -252,6 +256,14 @@ export function Steps() {
           </div>
 
           <p className="mt-8 border-l-2 border-pink pl-4 text-sm leading-relaxed text-muted-foreground">{step.tip}</p>
+
+          <Link
+            href={`/steps/${step.slug}`}
+            className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-brand underline underline-offset-4 hover:no-underline"
+          >
+            Read the full guide: {step.title}
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
 
           <div className="mt-8 flex items-center justify-between gap-4">
             <button

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { SectionReveal } from '@/components/section-reveal'
 
 export function SiteFooter() {
@@ -11,12 +12,12 @@ export function SiteFooter() {
         <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="font-serif text-3xl tracking-tight md:text-4xl">Come back whenever you need a pause.</p>
-            <a
-              href="#how-it-works"
+            <Link
+              href="/#how-it-works"
               className="mt-4 inline-block text-lg font-medium underline underline-offset-4 hover:no-underline"
             >
               Start again from step one
-            </a>
+            </Link>
           </div>
           <p className="text-sm">
             Made by <span className="font-medium">Khadijat Sanni</span>
