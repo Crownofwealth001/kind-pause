@@ -16,17 +16,17 @@ export function Hero() {
       </p>
       <div className="mt-10 flex flex-wrap items-center gap-4">
         <a
-          href="https://www.kindpause.com"
+          href="#how-it-works"
           className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 font-medium text-primary-foreground transition-opacity hover:opacity-85"
         >
-          Visit kindpause.com
+          Begin a kind pause
           <ArrowRight className="size-4" aria-hidden="true" />
         </a>
         <a
-          href="#how-it-works"
+          href="#why"
           className="rounded-full px-6 py-3 font-medium text-foreground underline-offset-4 hover:underline"
         >
-          See how it works
+          Why it matters
         </a>
       </div>
       </SectionReveal>

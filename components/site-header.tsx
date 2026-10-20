@@ -19,10 +19,10 @@ export function SiteHeader() {
           </li>
           <li>
             <a
-              href="https://www.kindpause.com"
+              href="#how-it-works"
               className="rounded-full bg-brand px-4 py-2 font-medium text-primary-foreground transition-opacity hover:opacity-85"
             >
-              Visit site
+              Take a pause
             </a>
           </li>
         </ul>

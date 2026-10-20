@@ -10,12 +10,12 @@ export function SiteFooter() {
       >
         <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="font-serif text-3xl tracking-tight md:text-4xl">See it or read more</p>
+            <p className="font-serif text-3xl tracking-tight md:text-4xl">Come back whenever you need a pause.</p>
             <a
-              href="https://www.kindpause.com"
+              href="#how-it-works"
               className="mt-4 inline-block text-lg font-medium underline underline-offset-4 hover:no-underline"
             >
-              www.kindpause.com
+              Start again from step one
             </a>
           </div>
           <p className="text-sm">
