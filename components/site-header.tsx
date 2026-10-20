@@ -2,7 +2,7 @@ export function SiteHeader() {
   return (
     <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-6">
       <a href="#top" className="flex items-center gap-2 font-serif text-xl tracking-tight">
-        <span aria-hidden="true" className="size-3 rounded-full bg-sage" />
+        <span aria-hidden="true" className="size-3 rounded-full bg-pink" />
         Kind Pause
       </a>
       <nav aria-label="Main">
@@ -20,7 +20,7 @@ export function SiteHeader() {
           <li>
             <a
               href="https://www.kindpause.com"
-              className="rounded-full bg-sage px-4 py-2 font-medium text-primary-foreground transition-opacity hover:opacity-85"
+              className="rounded-full bg-brand px-4 py-2 font-medium text-primary-foreground transition-opacity hover:opacity-85"
             >
               Visit site
             </a>

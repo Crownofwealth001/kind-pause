@@ -1,6 +1,6 @@
 export function SiteFooter() {
   return (
-    <footer className="bg-sage text-primary-foreground">
+    <footer className="bg-brand text-primary-foreground">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-6 py-16 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="font-serif text-3xl tracking-tight md:text-4xl">See it or read more</p>

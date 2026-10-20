@@ -10,7 +10,7 @@ const steps = [
 
 export function Steps() {
   return (
-    <section id="how-it-works" aria-labelledby="how-heading" className="bg-sage-soft">
+    <section id="how-it-works" aria-labelledby="how-heading" className="bg-pink-soft">
       <div className="mx-auto w-full max-w-5xl px-6 py-20 md:py-28">
         <h2 id="how-heading" className="font-serif text-3xl tracking-tight md:text-4xl">
           How it works
@@ -21,7 +21,7 @@ export function Steps() {
         <ol className="mt-12 grid gap-6 md:grid-cols-3">
           {steps.map((step) => (
             <li key={step.number} className="flex flex-col rounded-2xl bg-card p-8 shadow-sm">
-              <span className="font-serif text-sm text-[#6f7f68]">{step.number}</span>
+              <span className="font-serif text-sm text-pink">{step.number}</span>
               <h3 className="mt-6 font-serif text-2xl tracking-tight">{step.title}</h3>
               <p className="mt-3 leading-relaxed text-muted-foreground">{step.prompt}</p>
             </li>

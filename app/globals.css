@@ -7,8 +7,9 @@
 @theme inline {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-newsreader), ui-serif, Georgia, serif;
-  --color-sage: var(--sage);
-  --color-sage-soft: var(--sage-soft);
+  --color-brand: var(--brand);
+  --color-pink: var(--pink);
+  --color-pink-soft: var(--pink-soft);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -37,26 +38,27 @@
 
 :root {
   color-scheme: light;
-  --sage: #a8b5a2;
-  --sage-soft: #e6ebe3;
-  --background: #f8f9f6;
-  --foreground: #263024;
+  --brand: #1e2a5e;
+  --pink: #b8336a;
+  --pink-soft: #fbe4ec;
+  --background: #fdf8fa;
+  --foreground: #161d3f;
   --card: #ffffff;
-  --card-foreground: #263024;
+  --card-foreground: #161d3f;
   --popover: #ffffff;
-  --popover-foreground: #263024;
-  --primary: #a8b5a2;
-  --primary-foreground: #1f281d;
-  --secondary: #e6ebe3;
-  --secondary-foreground: #263024;
-  --muted: #eef1ec;
-  --muted-foreground: #556052;
-  --accent: #e6ebe3;
-  --accent-foreground: #263024;
+  --popover-foreground: #161d3f;
+  --primary: #1e2a5e;
+  --primary-foreground: #ffffff;
+  --secondary: #fbe4ec;
+  --secondary-foreground: #161d3f;
+  --muted: #f6edf1;
+  --muted-foreground: #4b5274;
+  --accent: #fbe4ec;
+  --accent-foreground: #161d3f;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #dde3d9;
-  --input: #dde3d9;
-  --ring: #7d8d76;
+  --border: #ecdbe2;
+  --input: #ecdbe2;
+  --ring: #b8336a;
   --radius: 0.75rem;
 }
 
