@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react'
+import { ArrowRight, Check, ChevronDown, RotateCcw } from 'lucide-react'
 import { SectionReveal } from '@/components/section-reveal'
 import { cn } from '@/lib/utils'
 
@@ -50,6 +50,7 @@ const steps = [
     body: 'Before you respond, pause and notice what is happening inside you. Putting a name to a feeling helps it settle, so it guides you instead of driving you.',
     tip: 'Breathe in slowly for four counts, and out for six. Notice where the feeling sits in your body.',
     loading: 'Breathe in… and out. Noticing what you feel…',
+    choiceHint: 'Choose any that feel true. More than one is okay.',
   },
   {
     number: '02',
@@ -59,6 +60,7 @@ const steps = [
     body: 'Every hard feeling points to something that matters to you. When you know what you need, you can ask for it honestly instead of guessing or holding it in.',
     tip: 'There is no wrong answer. Your needs are valid, even when the moment is messy.',
     loading: 'Listening for what matters to you…',
+    choiceHint: 'Choose what would help most right now.',
   },
   {
     number: '03',
@@ -68,6 +70,7 @@ const steps = [
     body: 'You do not have to fix everything at once. Choose one small, kind step that is honest about how you feel and caring toward the other person and yourself.',
     tip: 'Small is enough. One gentle sentence can change the direction of a hard moment.',
     loading: 'Gathering gentle words for your next step…',
+    choiceHint: 'Pick one small step you could take.',
   },
 ]
 
@@ -103,22 +106,37 @@ function Chip({
 }
 
 export function Steps() {
-  const [active, setActive] = useState(0)
+  const [open, setOpen] = useState<number | null>(0)
   const [selectedFeelings, setSelectedFeelings] = useState<string[]>([])
   const [selectedNeeds, setSelectedNeeds] = useState<string[]>([])
   const [selectedStep, setSelectedStep] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const loadingTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([])
 
   useEffect(() => () => {
     if (loadingTimer.current) clearTimeout(loadingTimer.current)
   }, [])
 
-  const goTo = (index: number) => {
-    setActive(index)
+  const openStep = (index: number, scroll = false) => {
+    setOpen(index)
     setLoading(true)
     if (loadingTimer.current) clearTimeout(loadingTimer.current)
     loadingTimer.current = setTimeout(() => setLoading(false), 1100)
+    if (scroll) {
+      requestAnimationFrame(() =>
+        itemRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+      )
+    }
+  }
+
+  const toggleStep = (index: number) => {
+    if (open === index) {
+      setOpen(null)
+      setLoading(false)
+      return
+    }
+    openStep(index)
   }
 
   const toggle = (list: string[], setList: (v: string[]) => void, value: string) => {
@@ -129,208 +147,235 @@ export function Steps() {
     setSelectedFeelings([])
     setSelectedNeeds([])
     setSelectedStep(null)
-    goTo(0)
+    openStep(0, true)
   }
 
-  const step = steps[active]
-  const hasAnything = selectedFeelings.length > 0 || selectedNeeds.length > 0 || selectedStep !== null
+  const completed = [selectedFeelings.length > 0, selectedNeeds.length > 0, selectedStep !== null]
+  const completedCount = completed.filter(Boolean).length
+  const hasAnything = completedCount > 0
+
+  const renderChoices = (index: number) => {
+    if (index === 0) {
+      return (
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Feelings">
+          {feelings.map((f) => (
+            <Chip
+              key={f}
+              label={f}
+              pressed={selectedFeelings.includes(f)}
+              onClick={() => toggle(selectedFeelings, setSelectedFeelings, f)}
+            />
+          ))}
+        </div>
+      )
+    }
+    if (index === 1) {
+      return (
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Needs">
+          {needs.map((n) => (
+            <Chip
+              key={n}
+              label={n}
+              pressed={selectedNeeds.includes(n)}
+              onClick={() => toggle(selectedNeeds, setSelectedNeeds, n)}
+            />
+          ))}
+        </div>
+      )
+    }
+    return (
+      <ul className="grid gap-3 sm:grid-cols-2" aria-label="Gentle next steps">
+        {nextSteps.map((n, i) => {
+          const pressed = selectedStep === i
+          return (
+            <li key={n.label}>
+              <button
+                type="button"
+                aria-pressed={pressed}
+                onClick={() => setSelectedStep(pressed ? null : i)}
+                className={cn(
+                  'flex h-full w-full flex-col rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink focus-visible:ring-offset-2',
+                  pressed ? 'border-brand bg-brand text-primary-foreground' : 'border-border hover:border-brand',
+                )}
+              >
+                <span className="font-medium">{n.label}</span>
+                <span className={cn('mt-1 text-sm leading-relaxed', pressed ? 'text-primary-foreground/85' : 'text-muted-foreground')}>
+                  {n.words}
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    )
+  }
 
   return (
     <section id="how-it-works" aria-labelledby="how-heading" className="bg-pink-soft">
-      <SectionReveal message="Finding a clear path…" className="mx-auto w-full max-w-5xl px-6 py-20 md:py-28">
+      <SectionReveal message="Finding a clear path…" className="mx-auto w-full max-w-3xl px-6 py-20 md:py-28">
         <h2 id="how-heading" className="font-serif text-3xl tracking-tight md:text-4xl">
           How it works
         </h2>
         <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">
-          Three simple steps, taken one at a time. Tap each step and choose what feels true for you right now.
+          Three simple steps, taken one at a time. Open each step and choose what feels true for you right now.
         </p>
 
-        <div role="tablist" aria-label="Kind Pause steps" className="mt-12 grid gap-4 md:grid-cols-3">
+        <div className="mt-12 flex flex-col gap-4">
           {steps.map((s, i) => {
-            const selected = i === active
+            const isOpen = open === i
+            const isDone = completed[i]
             return (
-              <button
+              <div
                 key={s.number}
-                type="button"
-                role="tab"
-                id={`step-tab-${i}`}
-                aria-selected={selected}
-                aria-controls={`step-panel-${i}`}
-                tabIndex={selected ? 0 : -1}
-                onClick={() => goTo(i)}
-                onKeyDown={(e) => {
-                  if (e.key === 'ArrowRight') goTo((active + 1) % steps.length)
-                  if (e.key === 'ArrowLeft') goTo((active - 1 + steps.length) % steps.length)
+                ref={(el) => {
+                  itemRefs.current[i] = el
                 }}
                 className={cn(
-                  'flex flex-col rounded-2xl p-6 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink focus-visible:ring-offset-2',
-                  selected ? 'bg-brand text-primary-foreground shadow-md' : 'bg-card shadow-sm hover:shadow-md',
+                  'scroll-mt-24 overflow-hidden rounded-2xl bg-card shadow-sm transition-shadow',
+                  isOpen && 'shadow-md ring-1 ring-brand/20',
                 )}
               >
-                <span className={cn('font-serif text-sm', selected ? 'text-primary-foreground/80' : 'text-pink')}>
-                  {s.number}
-                </span>
-                <span className="mt-4 font-serif text-xl tracking-tight md:text-2xl">{s.title}</span>
-                <span className={cn('mt-2 text-sm leading-relaxed', selected ? 'text-primary-foreground/85' : 'text-muted-foreground')}>
-                  {s.prompt}
-                </span>
-              </button>
+                <h3>
+                  <button
+                    type="button"
+                    id={`step-trigger-${i}`}
+                    aria-expanded={isOpen}
+                    aria-controls={`step-panel-${i}`}
+                    onClick={() => toggleStep(i)}
+                    className={cn(
+                      'flex w-full items-center gap-4 p-5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-pink md:gap-6 md:p-6',
+                      isOpen ? 'bg-brand text-primary-foreground' : 'hover:bg-muted/60',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'flex size-10 shrink-0 items-center justify-center rounded-full font-serif text-sm',
+                        isOpen
+                          ? 'bg-primary-foreground/15 text-primary-foreground'
+                          : isDone
+                            ? 'bg-brand text-primary-foreground'
+                            : 'bg-pink-soft text-pink',
+                      )}
+                    >
+                      {isDone && !isOpen ? <Check className="size-4" aria-hidden="true" /> : s.number}
+                      {isDone && <span className="sr-only">, chosen</span>}
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="font-serif text-xl tracking-tight md:text-2xl">{s.title}</span>
+                      <span className={cn('mt-1 text-sm leading-relaxed', isOpen ? 'text-primary-foreground/85' : 'text-muted-foreground')}>
+                        {s.prompt}
+                      </span>
+                    </span>
+                    <ChevronDown
+                      className={cn('size-5 shrink-0 transition-transform duration-300', isOpen && 'rotate-180')}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </h3>
+
+                {isOpen && (
+                  <div
+                    role="region"
+                    id={`step-panel-${i}`}
+                    aria-labelledby={`step-trigger-${i}`}
+                    aria-busy={loading}
+                    key={`${i}-${loading}`}
+                    className="animate-in fade-in slide-in-from-top-1 p-6 duration-500 md:p-8"
+                  >
+                    {loading ? (
+                      <div role="status" className="flex min-h-56 flex-col items-center justify-center gap-5 text-center">
+                        <span className="relative flex size-12 items-center justify-center" aria-hidden="true">
+                          <span className="absolute inset-0 animate-ping rounded-full bg-pink/30 [animation-duration:1.6s]" />
+                          <span className="size-7 animate-pulse rounded-full bg-brand" />
+                        </span>
+                        <p className="font-serif text-lg tracking-tight text-foreground md:text-xl">{s.loading}</p>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="max-w-2xl leading-relaxed text-muted-foreground">{s.body}</p>
+                        <p className="mt-6 text-sm font-medium text-foreground">{s.choiceHint}</p>
+                        <div className="mt-3">{renderChoices(i)}</div>
+
+                        <p className="mt-6 border-l-2 border-pink pl-4 text-sm leading-relaxed text-muted-foreground">{s.tip}</p>
+
+                        <div className="mt-6 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <Link
+                            href={`/steps/${s.slug}`}
+                            className="inline-flex items-center gap-2 text-sm font-medium text-brand underline underline-offset-4 hover:no-underline"
+                          >
+                            Read the full guide
+                            <ArrowRight className="size-4" aria-hidden="true" />
+                          </Link>
+                          {i < steps.length - 1 ? (
+                            <button
+                              type="button"
+                              onClick={() => openStep(i + 1, true)}
+                              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-85"
+                            >
+                              Next: {steps[i + 1].title}
+                              <ArrowRight className="size-4" aria-hidden="true" />
+                            </button>
+                          ) : (
+                            <a
+                              href="#your-kind-pause"
+                              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-85"
+                            >
+                              See your kind pause
+                              <ArrowRight className="size-4" aria-hidden="true" />
+                            </a>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>
 
-        <div
-          role="tabpanel"
-          id={`step-panel-${active}`}
-          aria-labelledby={`step-tab-${active}`}
-          aria-busy={loading}
-          key={`${active}-${loading}`}
-          className="mt-6 animate-in fade-in slide-in-from-bottom-2 rounded-2xl bg-card p-8 shadow-sm duration-500 md:p-10"
-        >
-          {loading ? (
-            <div role="status" className="flex min-h-72 flex-col items-center justify-center gap-6 text-center">
-              <span className="relative flex size-14 items-center justify-center" aria-hidden="true">
-                <span className="absolute inset-0 animate-ping rounded-full bg-pink/30 [animation-duration:1.6s]" />
-                <span className="size-8 animate-pulse rounded-full bg-brand" />
-              </span>
-              <p className="font-serif text-xl tracking-tight text-foreground md:text-2xl">{step.loading}</p>
-              <p className="text-sm text-muted-foreground">
-                Step {step.number} · {step.title}
-              </p>
-            </div>
-          ) : (
-          <>
-          <p className="font-serif text-2xl tracking-tight md:text-3xl">{step.prompt}</p>
-          <p className="mt-4 max-w-2xl leading-relaxed text-muted-foreground">{step.body}</p>
-
-          <div className="mt-8">
-            {active === 0 && (
-              <div className="flex flex-wrap gap-2" aria-label="Feelings">
-                {feelings.map((f) => (
-                  <Chip
-                    key={f}
-                    label={f}
-                    pressed={selectedFeelings.includes(f)}
-                    onClick={() => toggle(selectedFeelings, setSelectedFeelings, f)}
-                  />
-                ))}
+        <div id="your-kind-pause" aria-live="polite" className="scroll-mt-24">
+          {hasAnything && (
+            <div className="mt-6 animate-in fade-in slide-in-from-bottom-2 rounded-2xl border border-brand/20 bg-background p-6 duration-500 md:p-10">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Your kind pause</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {completedCount} of 3 steps chosen
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={reset}
+                  className="inline-flex shrink-0 items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <RotateCcw className="size-3.5" aria-hidden="true" />
+                  Start again
+                </button>
               </div>
-            )}
-            {active === 1 && (
-              <div className="flex flex-wrap gap-2" aria-label="Needs">
-                {needs.map((n) => (
-                  <Chip
-                    key={n}
-                    label={n}
-                    pressed={selectedNeeds.includes(n)}
-                    onClick={() => toggle(selectedNeeds, setSelectedNeeds, n)}
-                  />
-                ))}
+              <div className="mt-5 space-y-3 font-serif text-xl leading-snug md:text-2xl">
+                {selectedFeelings.length > 0 && (
+                  <p className="animate-in fade-in slide-in-from-left-2 duration-500">
+                    I feel <span className="text-brand">{joinWords(selectedFeelings).toLowerCase()}</span>.
+                  </p>
+                )}
+                {selectedNeeds.length > 0 && (
+                  <p className="animate-in fade-in slide-in-from-left-2 duration-500">
+                    I need <span className="text-brand">{joinWords(selectedNeeds).toLowerCase()}</span>.
+                  </p>
+                )}
+                {selectedStep !== null && (
+                  <p className="animate-in fade-in slide-in-from-left-2 duration-500">
+                    My gentle next step: <span className="text-brand">{nextSteps[selectedStep].words}</span>
+                  </p>
+                )}
+                {completedCount === 3 && (
+                  <p className="animate-in fade-in pt-2 font-sans text-base text-muted-foreground duration-700">
+                    You paused, you listened to yourself, and you chose care. That is enough for now.
+                  </p>
+                )}
               </div>
-            )}
-            {active === 2 && (
-              <ul className="grid gap-3 sm:grid-cols-2">
-                {nextSteps.map((n, i) => {
-                  const pressed = selectedStep === i
-                  return (
-                    <li key={n.label}>
-                      <button
-                        type="button"
-                        aria-pressed={pressed}
-                        onClick={() => setSelectedStep(pressed ? null : i)}
-                        className={cn(
-                          'flex h-full w-full flex-col rounded-xl border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink focus-visible:ring-offset-2',
-                          pressed ? 'border-brand bg-brand text-primary-foreground' : 'border-border hover:border-brand',
-                        )}
-                      >
-                        <span className="font-medium">{n.label}</span>
-                        <span className={cn('mt-1 text-sm leading-relaxed', pressed ? 'text-primary-foreground/85' : 'text-muted-foreground')}>
-                          {n.words}
-                        </span>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </div>
-
-          <p className="mt-8 border-l-2 border-pink pl-4 text-sm leading-relaxed text-muted-foreground">{step.tip}</p>
-
-          <Link
-            href={`/steps/${step.slug}`}
-            className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-brand underline underline-offset-4 hover:no-underline"
-          >
-            Read the full guide: {step.title}
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </Link>
-
-          <div className="mt-8 flex items-center justify-between gap-4">
-            <button
-              type="button"
-              onClick={() => goTo(active - 1)}
-              disabled={active === 0}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-opacity hover:opacity-70 disabled:pointer-events-none disabled:opacity-0"
-            >
-              <ArrowLeft className="size-4" aria-hidden="true" />
-              Back
-            </button>
-            {active < steps.length - 1 && (
-              <button
-                type="button"
-                onClick={() => goTo(active + 1)}
-                className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-85"
-              >
-                Next step
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </button>
-            )}
-          </div>
-          </>
-          )}
-        </div>
-
-        <div aria-live="polite" className="mt-6 rounded-2xl border border-brand/20 bg-background p-8 md:p-10">
-          <div className="flex items-start justify-between gap-4">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">Your kind pause</p>
-            {hasAnything && (
-              <button
-                type="button"
-                onClick={reset}
-                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-              >
-                <RotateCcw className="size-3.5" aria-hidden="true" />
-                Start again
-              </button>
-            )}
-          </div>
-          {hasAnything ? (
-            <div className="mt-4 space-y-3 font-serif text-xl leading-snug md:text-2xl">
-              {selectedFeelings.length > 0 && (
-                <p>
-                  I feel <span className="text-brand">{joinWords(selectedFeelings).toLowerCase()}</span>.
-                </p>
-              )}
-              {selectedNeeds.length > 0 && (
-                <p>
-                  I need <span className="text-brand">{joinWords(selectedNeeds).toLowerCase()}</span>.
-                </p>
-              )}
-              {selectedStep !== null && (
-                <p>
-                  My gentle next step: <span className="text-brand">{nextSteps[selectedStep].words}</span>
-                </p>
-              )}
-              {selectedFeelings.length > 0 && selectedNeeds.length > 0 && selectedStep !== null && (
-                <p className="pt-2 font-sans text-base text-muted-foreground">
-                  You paused, you listened to yourself, and you chose care. That is enough for now.
-                </p>
-              )}
             </div>
-          ) : (
-            <p className="mt-4 leading-relaxed text-muted-foreground">
-              Take your time. As you choose your words above, they will gather here, so you can see your feeling, your need, and your next step together.
-            </p>
           )}
         </div>
       </SectionReveal>
