@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react'
 import { SectionReveal } from '@/components/section-reveal'
 import { cn } from '@/lib/utils'
@@ -47,6 +47,7 @@ const steps = [
     prompt: 'What am I feeling right now?',
     body: 'Before you respond, pause and notice what is happening inside you. Putting a name to a feeling helps it settle, so it guides you instead of driving you.',
     tip: 'Breathe in slowly for four counts, and out for six. Notice where the feeling sits in your body.',
+    loading: 'Breathe in… and out. Noticing what you feel…',
   },
   {
     number: '02',
@@ -54,6 +55,7 @@ const steps = [
     prompt: 'What do I need here?',
     body: 'Every hard feeling points to something that matters to you. When you know what you need, you can ask for it honestly instead of guessing or holding it in.',
     tip: 'There is no wrong answer. Your needs are valid, even when the moment is messy.',
+    loading: 'Listening for what matters to you…',
   },
   {
     number: '03',
@@ -61,6 +63,7 @@ const steps = [
     prompt: 'What is a gentle next word or action?',
     body: 'You do not have to fix everything at once. Choose one small, kind step that is honest about how you feel and caring toward the other person and yourself.',
     tip: 'Small is enough. One gentle sentence can change the direction of a hard moment.',
+    loading: 'Gathering gentle words for your next step…',
   },
 ]
 
@@ -100,6 +103,19 @@ export function Steps() {
   const [selectedFeelings, setSelectedFeelings] = useState<string[]>([])
   const [selectedNeeds, setSelectedNeeds] = useState<string[]>([])
   const [selectedStep, setSelectedStep] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+  const loadingTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => {
+    if (loadingTimer.current) clearTimeout(loadingTimer.current)
+  }, [])
+
+  const goTo = (index: number) => {
+    setActive(index)
+    setLoading(true)
+    if (loadingTimer.current) clearTimeout(loadingTimer.current)
+    loadingTimer.current = setTimeout(() => setLoading(false), 1100)
+  }
 
   const toggle = (list: string[], setList: (v: string[]) => void, value: string) => {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value])
@@ -109,7 +125,7 @@ export function Steps() {
     setSelectedFeelings([])
     setSelectedNeeds([])
     setSelectedStep(null)
-    setActive(0)
+    goTo(0)
   }
 
   const step = steps[active]
@@ -137,10 +153,10 @@ export function Steps() {
                 aria-selected={selected}
                 aria-controls={`step-panel-${i}`}
                 tabIndex={selected ? 0 : -1}
-                onClick={() => setActive(i)}
+                onClick={() => goTo(i)}
                 onKeyDown={(e) => {
-                  if (e.key === 'ArrowRight') setActive((active + 1) % steps.length)
-                  if (e.key === 'ArrowLeft') setActive((active - 1 + steps.length) % steps.length)
+                  if (e.key === 'ArrowRight') goTo((active + 1) % steps.length)
+                  if (e.key === 'ArrowLeft') goTo((active - 1 + steps.length) % steps.length)
                 }}
                 className={cn(
                   'flex flex-col rounded-2xl p-6 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink focus-visible:ring-offset-2',
@@ -163,9 +179,23 @@ export function Steps() {
           role="tabpanel"
           id={`step-panel-${active}`}
           aria-labelledby={`step-tab-${active}`}
-          key={active}
+          aria-busy={loading}
+          key={`${active}-${loading}`}
           className="mt-6 animate-in fade-in slide-in-from-bottom-2 rounded-2xl bg-card p-8 shadow-sm duration-500 md:p-10"
         >
+          {loading ? (
+            <div role="status" className="flex min-h-72 flex-col items-center justify-center gap-6 text-center">
+              <span className="relative flex size-14 items-center justify-center" aria-hidden="true">
+                <span className="absolute inset-0 animate-ping rounded-full bg-pink/30 [animation-duration:1.6s]" />
+                <span className="size-8 animate-pulse rounded-full bg-brand" />
+              </span>
+              <p className="font-serif text-xl tracking-tight text-foreground md:text-2xl">{step.loading}</p>
+              <p className="text-sm text-muted-foreground">
+                Step {step.number} · {step.title}
+              </p>
+            </div>
+          ) : (
+          <>
           <p className="font-serif text-2xl tracking-tight md:text-3xl">{step.prompt}</p>
           <p className="mt-4 max-w-2xl leading-relaxed text-muted-foreground">{step.body}</p>
 
@@ -226,7 +256,7 @@ export function Steps() {
           <div className="mt-8 flex items-center justify-between gap-4">
             <button
               type="button"
-              onClick={() => setActive(active - 1)}
+              onClick={() => goTo(active - 1)}
               disabled={active === 0}
               className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-opacity hover:opacity-70 disabled:pointer-events-none disabled:opacity-0"
             >
@@ -236,7 +266,7 @@ export function Steps() {
             {active < steps.length - 1 && (
               <button
                 type="button"
-                onClick={() => setActive(active + 1)}
+                onClick={() => goTo(active + 1)}
                 className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-85"
               >
                 Next step
@@ -244,6 +274,8 @@ export function Steps() {
               </button>
             )}
           </div>
+          </>
+          )}
         </div>
 
         <div aria-live="polite" className="mt-6 rounded-2xl border border-brand/20 bg-background p-8 md:p-10">
